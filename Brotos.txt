@@ -2,3 +2,39 @@
 http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-1511.iso
 2) Open VirtualBox and create a new virtual machine with centos running on it. If you are not sure how to do that, you can check my tutorial on creating virtual machines on VirtulBox.
 3) Once you reboot your virtual machine after installation, type "yum update" and then "yum upgrade".
+4) Execute "yum group install "Development Tools"".
+5) Install dependencies: "yum install cmake make gcc gcc-c++ flex bison libpcap-devel openssl-devel python-devel swig zlib-devel perl"
+6) yum install GeoIP-devel to enable geolocating of IP addresses.
+In order to download geoip database install wget (yum install wget) and then execute the following commands:
+wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+gunzip GeoLiteCity.dat.gz
+Then move it to required folder:
+mv GeoLiteCity.dat /usr/share/GeoIP/GeoIPCity.dat
+7) Install gawk to enable bro-cut features
+yum install gawk
+8) Install gperftools to improve CPU usage.
+yum install gperftools
+9) Install epel
+yum -y install epel-release
+10) After installing Bro, it is better to check if all the required dependencies are installed. If not installed, Bro will not give any errors, but some of its features may not work as expected. To check if runtime dependencies are installed, execute the following command:
+yum -y install libpcap openssl-libs bind-libs zlib bash python libcurl gawk GeoIP jemalloc
+And to check build dependencies, execute the following command:
+yum -y install @development libpcap-devel openssl-devel bind-devel zlib-devel cmake git perl libcurl-devel GeoIP-devel python-devel jemalloc-devel swig rpmdevtools
+11) AF_PACKET requires kernel-devel, so install it as follows:
+yum install -y kernel-devel-$(uname -r)
+12) Now, we are hopefully done with dependencies, so we can move on to installation of bro. Get the desired download link for the desired Bro version and issue the following commands:
+wget https://www.bro.org/downloads/release/bro-2.4.1.tar.gz
+tar -xvf bro-2.4.1
+cd bro-2.4.1
+./configure
+make
+make install
+13) After these steps, you should find bro under /usr/local/bro unless you explicitly specified a different path.
+14) In order to successfully run Bro, you need to make a few configurations. For that, go to /usr/local/bro/etc/networks.cfg file and add your desired IP mask. Also there is broctl.cfg file under the same directory, which performs general adjustments for bro, like bro mailing options or log refresh options. You can change LogRotationInterval to 86400 in order to save logs each day. Also you can change LogExpireInterval field to delete logs after a certain amount of time. Also LogDir field asserts directory to which logs are saved. CfgDir field is used to show location of other configuration files, and finally SitePolicyStandalone field indicates the script that Bro will look for. Also modify nodes.cfg according to your needs.
+15) To run bro and broctl from anywhere, type the following command:
+export PATH=/usr/local/bro/bin:$PATH
+Do not forget that this change will be effective only for the time being, to make it permanent modify ~/.bashrc and add the above line.
+16) You can check bro status by typing broctl in command line and then typing status. You can use check command in broctl to check bro scripts, install to install these scripts and start or restart to start bro. Note that you should issue install command before issuing check command, otherwise you may see some errors.
+17) After these, your Bro should be running. You can see the logs under /usr/local/bro/logs/current/ directory. Bro automatically generates different types of log files depending on your network traffic. You can see the possible log file types Bro supports and which information these log files present in https://www.bro.org/sphinx-git/script-reference/log-files.html.
+
+
