@@ -36,5 +36,5 @@ export PATH=/usr/local/bro/bin:$PATH
 Do not forget that this change will be effective only for the time being, to make it permanent modify ~/.bashrc and add the above line.
 16) You can check bro status by typing broctl in command line and then typing status. You can use check command in broctl to check bro scripts, install to install these scripts and start or restart to start bro. Note that you should issue install command before issuing check command, otherwise you may see some errors.
 17) After these, your Bro should be running. You can see the logs under /usr/local/bro/logs/current/ directory. Bro automatically generates different types of log files depending on your network traffic. You can see the possible log file types Bro supports and which information these log files present in https://www.bro.org/sphinx-git/script-reference/log-files.html.
-
+18) Bro comes with many scripts, some of which are not even loaded in default configuration. For example, if you want to enable file extraction, there is a bro script (/frameworks/files/extract-all-files.bro) which extracts files. You can load this script by adding @load /frameworks/files/extract-all-files in local.bro file. 
 
