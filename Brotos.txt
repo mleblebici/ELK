@@ -1,0 +1,4 @@
+1) Choose one of the mirrors from the following link and download Centos 7 ISO.
+http://isoredirect.centos.org/centos/7/isos/x86_64/CentOS-7-x86_64-Everything-1511.iso
+2) Open VirtualBox and create a new virtual machine with centos running on it. If you are not sure how to do that, you can check my tutorial on creating virtual machines on VirtulBox.
+3) Once you reboot your virtual machine after installation, type "yum update" and then "yum upgrade".
