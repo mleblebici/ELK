@@ -37,4 +37,18 @@ Do not forget that this change will be effective only for the time being, to mak
 16) You can check bro status by typing broctl in command line and then typing status. You can use check command in broctl to check bro scripts, install to install these scripts and start or restart to start bro. Note that you should issue install command before issuing check command, otherwise you may see some errors.
 17) After these, your Bro should be running. You can see the logs under /usr/local/bro/logs/current/ directory. Bro automatically generates different types of log files depending on your network traffic. You can see the possible log file types Bro supports and which information these log files present in https://www.bro.org/sphinx-git/script-reference/log-files.html.
 18) Bro comes with many scripts, some of which are not even loaded in default configuration. For example, if you want to enable file extraction, there is a bro script (/frameworks/files/extract-all-files.bro) which extracts files. You can load this script by adding @load /frameworks/files/extract-all-files in local.bro file. 
+19) In order to perform some maintenance tasks automatically, like restarting the bro if stopped abnormally or erasing expired log files, issue "crontab -e" command and add the following line:
+* 0-23/1 * * * /usr/local/bro/bin/broctl cron
+Note that you can adjust the time parameters, above line will perform every one hour.
+20) One important thing to note here is that bro may cause capture losses without dropped packets. You may not notice it since there will be no record indicating there are dropped packets. However, still there may be capture losses. The main reason for this is misconfiguration of Ethernet interface. TCP segmentation offload and generic segmentation offload may cause this problem, which loeads to observation of packets much larger than the MTU of the interface which thereupon may interfere with the maximum packet capture size. The solution is to disable the interface's offloading features. To do so, issue the following commands:
 
+ethtool -K eth0 tso off
+ethtool -K eth0 gso off
+ethtool -K eth0 gro off
+ethtool -K eth0 lro off 
+ethtool -K eth0 ufo off
+ethtool -K eth0 rx off
+ethtool -K eth0 tx off
+ethtool -K eth0 sg off
+
+You can do these in one line, but I strongly recommend you to perform each of these separately and check if the problem is fixed after exectution of each command. The reason for this is that turning some of these features may cause problems later. Therefore, you should start with tso and follow the order used above.
