@@ -52,3 +52,41 @@ ethtool -K eth0 tx off
 ethtool -K eth0 sg off
 
 You can do these in one line, but I strongly recommend you to perform each of these separately and check if the problem is fixed after exectution of each command. The reason for this is that turning some of these features may cause problems later. Therefore, you should start with tso and follow the order used above.
+
+
+File Extraction with Bro
+In order to extract files with Bro, you can use Bro's own extract-all-files.bro script or you can use https://github.com/hosom/bro-file-extraction. Also you can change bro-file-extraction to show filenames by changing main.bro as follows:
+
+load ./file-extensions
+
+module FileExtraction;
+
+export {
+        ## Path to store files
+        const path: string = "" &redef;
+        ## Hook to include files in extraction
+        global extract: hook(f: fa_file, meta: fa_metadata);
+        ## Hook to exclude files from extraction
+        global ignore: hook(f: fa_file, meta: fa_metadata);
+}
+
+event file_sniff(f: fa_file, meta: fa_metadata)
+        {
+        if ( meta?$mime_type && !hook FileExtraction::extract(f, meta) )
+                {
+                if ( !hook FileExtraction::ignore(f, meta) )
+                        return;
+                if ( meta$mime_type in mime_to_ext )
+                        local fext = mime_to_ext[meta$mime_type];
+                else
+                        fext = split_string(meta$mime_type, /\//)[1];
+
+                local fname = fmt("%s%s-%s.%s", path, f$source, f$id, fext);
+
+                if ( f?$info && f$info?$filename)
+                        fname = fmt("%s%s-%s-%s", path, f$source, f$id, f$info$filename);
+
+                Files::add_analyzer(f, Files::ANALYZER_EXTRACT,
+                        [$extract_filename=fname]);
+                }
+        }
