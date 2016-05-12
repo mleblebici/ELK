@@ -1,1 +1,16 @@
-Integration of Bro logs with ELK
+For integration of Bro with ELK, first we need to forward Bro's logs to ELK stack. For this purpose, logstash-forwarder and lumberjack protocol will be used.
+1) Install logstash-forwarder on your device running Bro. 
+yum install logstash-forwarder
+2) In order to have logstash-forwarder run appropriately, we need to edit some fields in logstash-frorwarder configuration fields. Configuration file is in JSON format and generally located in /etc/logstash-forwarder.conf. You should change servers, ssl certificate, ssl key, ssl ca and files fields accordingly. A sample configuration file can be found in this repository.
+3) In order for ssl certificates to work correctly, you need to ensure that dates on both machines match. If they do so, you can move on to the next step. If not, please install and configure ntp your machines as follows:
+yum install ntp
+ntpdate ntpServerIPAddress
+chkconfig ntpd on
+systemctl start ntpd.service
+4) Now we will make some configurations on ELK running machine. First, you need to generate appropriate input config file. A sample input config file is provided in the repository.
+5) Now we need to configure openssl and generate certificates. First open /etc/pki/tls/openssl.cnf file, and find [ v3_ca ] field. Insert "subjectAltName = ELKServerIP". Now generate ssl certificates as follows:
+openssl req -config /etc/pki/tls/openssl.cnf -x509 -days 3650 -batch -nodes -newkey rsa:2048 -keyout private/logstash-forwarder.key -out certs/logstash-forwarder.crt
+6) Copy these generated certificates to logstash-forwarder running machine. Remember that path information on logstash-forwarder.conf and the path you are copying must be the same. Also, on ELK side, ssl certificates paths given in logstash input configuration file should correspond to paths given in above command.
+7) Now is time to add logstash filter for Bro logs. You can find that configuration file in this repository. An important note here is the use of translate plugin. Logstash does not come with translate plugin installed. You need to install it using "bin/plugin install logstash-filter-translate". This plugin can be summarized as a generic find and replace tool. We used it for Bro's conn.log to provide explanation about conn.log's conn_state and history fields.
+8) We are done at this point. You can check your newly added configuration files using "/opt/logstash/bin/logstash agent -f configurationFileName --configtest".
+9) Now you can restart logstash service and you should be receiving Bro logs.
