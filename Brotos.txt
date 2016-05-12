@@ -90,3 +90,8 @@ event file_sniff(f: fa_file, meta: fa_metadata)
                         [$extract_filename=fname]);
                 }
         }
+
+Logging in json format
+1) Check if json-logs.bro exists, it should reside under $PREFIX/share/bro/policy/tuning/, if not, you can find it online.
+2) Insert "@load $PREFIX/share/bro/policy/tuning/json-logs.bro" to local.bro.
+3) Then run broctl, check configuration for any errors, install the scripts and restart bro. After that you should be seeing logs in json format.
