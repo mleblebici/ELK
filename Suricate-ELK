@@ -1,1 +1,39 @@
-Suricata installation&configuration and integrating with ELK
+1) Go to System/Package Manager/Available PAckages
+2) Find suricata and install
+3) Go to Services/Suricata/Interfaces
+4) Add an interface
+5) Choose log options (1.png)
+6) Go to Global Settings and add rules (2.png)
+7) Go to Updates to get the rules (3.png)
+8) Do not forget to enbale surricata on the interface. (5.png)
+9) You can go to Logs View and see the log files there (4.png)
+10) At this point, you should see the logs. If you do not see, reboot pfsense and view log files. 
+11) Now ssh to pfsense. You should see the eve.json as in this figure (6.png)
+12) Now go to https://beats-nightlies.s3.amazonaws.com/index.html?prefix=jenkins/filebeat/ and find most recent filebeat-freebsd-386 or filebeat-freebsd-amd64 depending on whether the system is 32-bit or 64-bit.
+13) Copy the url of that file.
+14) Execute the commands: 
+cd ~
+fetch https://beats-nightlies.s3.amazonaws.com/jenkins/filebeat/426-79bd08a8db4487c0ddf72486cb1553ded7528df8/filebeat-freebsd-386
+mkdir /etc/filebeat
+mv filebeat-freebsd-386 /etc/filebeat/filebeat
+chmod +x /etc/filebeat/filebeat
+15) You also need to create filebeat.yml configuration file. It should be like (7.png). Do not forget to change hosts ip address and port number (logstash server's).
+16) Check if the configuration is ok (8.png).
+17) Also we need to ensure filebeat is executed on startup. So go to System/Package Manager/Available Packages on pfsense. Install shellcmd.
+18) Go to Services/shellcmd. Add command /etc/filebeat/filebeat (9.png). Now it will be executed on startup.
+19) We are now done on the pfsense side. Now we will move on to ELK side (logstash server).
+20) Now ssh to logstash server and go to /etc/logstash/conf.d. The configuration files needed are (10.png). Here 03-beatinM.conf and 13-suricataM.conf are for eve.json log file. And others are for syslog files. The contents of each conf file is:
+01-inputs.conf --> 11.png
+02-inputs.conf --> 12.png
+03-beatinM.conf --> 13.png
+10-pfsense-syslog.conf --> 14.png
+11-pfsense.conf --> 15.png
+13-suricataM.conf --> 16.png
+30-outputs.conf --> 17.png
+21) Also you need a pattern file on a separate patterns folder. Its content is (18.png).
+22) After these you should run service logstash configtest to check if configuration is ok. (19.png).
+23) Type service logstash restart.
+24) Now you should see logs in /var/log/logstash/logstash.stdout.
+25) You can also see the logs on Kibana GUI (20.png).
+
+Maybe needed: Status/System Logs/Settings (21.png)
