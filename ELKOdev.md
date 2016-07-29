@@ -59,7 +59,7 @@ $ rpm –import https://packages.elastic.co/GPG-KEY-elasticsearch
 ```
 
 * Elasticsearch’ün yüklenebilmesi için gerekli olan repo dosyasını aşağıdaki gibi oluşturunuz ve elasticsearch.repo olarak /etc/yum.repos.d klasörü altına kaydediniz:
-![alt text](2.png)
+![alt text](1.png)
 
 * Oluşturduğunuz repo dosyasını kullanarak elasticsearch’ü yükleyiniz:
 ```sh
