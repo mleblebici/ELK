@@ -75,3 +75,55 @@ $ systemctl start elasticsearch.service
 
 * Elasticsearch’ün düzgün çalışıp çalışmadığını kontrol etmek için aşağıdaki komutu çalıştırabilirsiniz. Çıkan sonuçta elasticsearch versiyonunu, dizi adını (varsayılan olarak elasticsearch) ve diğer varsayılan değerleri görebilirsiniz.
 ![alt text](images/2.png)
+
+### Konfigürasyon
+Elasticsearch konfigürasyon dosyaları /etc/elasticsearch/conf dizini altında bulunmaktadır. Bu dizin altında elasticsearch.yml ve logging.yml dosyaları bulunmaktadır. Genel olarak elasticsearch ayarları elasticsearch.yml dosyası üzerinden yapılmaktadır. Logging.yml dosyası ise Elasticsearch loglama ayarlarını içermektedir. Elasticsearch.yml dosyası uzantısından da anlaşılacağı üzere yaml formatında yazılmıştır. Buradaki alanlardan en çok kullanılanlar veya değiştirilmesi gerekenler aşağıda listelenmiştir.
+Path.log, path.plugin, path.conf: logların, pluginlerin ve konfigürasyon dosyalarının hangi dizin altında olduğunu gösterir.
+Cluster.name, node.name: Dizi ve düğümün isminin girilebilmesini sağlar. Verilmezse elasticsearch varsayılan değerlerden atamaktadır.
+İndex.number_of_shards, index.number_of_replicas: Bir endeks için zarf ve kopya sayısının girilebilmesini sağlar. Varsayılan olarak zarf sayısı 5 ve kopya sayısı 1’dir.
+Plugin.mandatory: Bir düğümün çalışması için yüklenmesi zorunlu olan pluginlerin belirtilmesini sağlar. Eğer burada yazan bir plugin yüklü değilse o düğüm başlayamaz.
+Network.host: Diğer düğümlerin bu düğümle konuşmak için kullanacağı ve bind adresi olan IP adresinin belirtilmesini sağlar.
+Transport.tcp.port: Düğümler arası iletişimde kullanılacak port numarasını belirtir. Varsayılan olarak 9300’dür.
+http.port: http trafiğinin dinleneceği port numarasını belirtir. 
+http.enabled: false verildiğinde http’nin olarak kullanılmamasını sağlar.
+Logging.yml Elasticsearch için loglama ayarlarını içerir. Genel olarak logging.yml hakkında bilinmesi gereken logger.level alanındaki değerdir. Bu değere bağlı olarak elasticsearch loglama seviyesi belirlenir. Bu değer ERROR, WARN, INFO, DEBUG ve TRACE değerlerinden herhangi biri olabilir. Varsayılan olarak INFO seçilidir, fakat daha fazla log istendiğinde DEBUG veya TRACE seçilebilir, aynı şekilde sadece hatalar gösterilmek istendiğinde ERROR olarak seçilebilir.
+
+### Elasticsearch REST API
+
+ELK Stack kurulum ve yönetimi için çok gerekli olmasa da, oluşabilecek hataları çözebilmek ve Elasticsearch i ayrı olarak kullanabilmek için API’lerini öğrenmek faydalı olacaktır. Elasticsearch REST API  genel olarak endeks ve doküman ekleme, çıkarma ve değiştirme işlemleri için ve dizilerin durumlarını ve istatistiklerini kontrol edebilmek için kullanılmaktadır. Ayrıca REST API ile beraber arama, filtreleme, sıralama gibi daha pek çok fonksiyon yerine getirilebilmektedir. Bu çalışma kapsamında, REST API ile yapılabilecek belli başlı temel fonksiyonlar aşağıda örneklendirilmiştir:
+
+* Elasticsearch’de bulunan dizilerin durumunu öğrenmek için ```curl ‘localhost:9200/_cat/health?v’``` komutu çalıştırılabilir. Çıkan sonuçta yeşil (green) herhangi bir sorun olmadığını, sarı (yellow) verilerin tamamen operasyonel olduğunu fakat bazı kopyaların henüz ayrılmadığını, kırmızı (red) ise bazı verilerin erişilebilir olmadığını ifade etmektedir. Ayrıca çıkan cevapta kaç tane düğüm ve zarf olduğunu da görebilirsiniz.
+
+* Elasticsearch’de dizide bulunan düğümlerin listesini öğrenmek için ```curl ‘localhost:9200/\_cat/nodes?v’``` komutu çalıştırılabilir. Aynı şekilde tüm endeksleri listelemek için ```curl ‘localhost:9200/\_cat/indices?v’``` komutu çalıştırabilir.
+
+* Komut satırından yeni bir endeks oluşturmak için ```curl -XPUT ‘localhost:9200/endeksAdi?pretty’``` komutu çalıştırılabilir.
+
+* Var olan bir endekse yeni bir doküman eklemek için
+```sh
+curl -XPUT ‘localhost:9200/endeksAdi/tipAdi/1?pretty -d ‘
+{
+	“alanAdi”: “değeri”
+}’
+```
+şeklinde komut girilebilir. Doküman üzerinde değişiklik yapılmak istendiğinde aynı komut istenilen değerlerle birlikte tekrar çalıştırılabilir. Burada ayırt edici unsur id değeri yani bu örnek için 1’dir. Id değeri 1 olarak girilen tüm komutlar bu doküman üzerinde değişiklik yapacaktır, fakat id değeri 2 olarak girilen başka bir komut yeni bir doküman oluşturacaktır. Bu dokümana da ulaşmak için ```curl -XGET ‘localhost:9200/endeksAdi/tipAdi/2?pretty’``` komutu çalıştırılabilir.
+
+* Var olan bir endeksi komut satırından silmek için ```curl -XDELETE ‘localhost:9200/endeksAdi?pretty’``` komutu çalıştırılabilir.
+
+* Var olan bir dokümanı komut satırından silmek için ```curl -XDELETE ‘localhost:9200/endeksAdi/tipAdi/id?pretty’``` komutu çalıştırılabilir.
+
+* Dokümanları elle girmek yerine tek bir komut satırıyla bir dosyadan endekslenmek istediğinde ```curl -XPOST ‘localhost:9200/endeksAdi/tipAdi/_bulk?pretty’ --data-binary “@fileName.json”``` komutu çalıştırılabilir. Dosyanın json formatına sahip olduğu önceden kontrol edilmelidir.
+
+* Bir endeksteki tüm dokümanları getirmek için
+```sh
+curl ‘localhost:9200/endeksAdi/_search?q=*&pretty’
+```
+komutu veya
+```sh
+curl -XPOST ‘localhost:9200/endeksAdi/_search?pretty’ -d ‘
+{
+	“query”: { “match_all”: {}}
+}’
+```
+komutu çalıştırılabilir.
+
+* Üstteki komutta geçen query kısmı, dokümanların istenilen alanlarının istenilen filtreden geçirildikten sonra getirilebilecek şekilde değiştirilebilmektedir. Bu işlemlerin nasıl yapılacağı Elasticsearch’ün sitesinden bulunabilir.
