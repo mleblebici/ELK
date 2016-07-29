@@ -2,7 +2,7 @@
 
 # Başlık1
 
-[Başlık2]
+[Başlık2](#Başlık2)
 
 
 
