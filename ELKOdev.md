@@ -149,7 +149,7 @@ Gelen cevabın alt satırlarına bakıldığında örneğin iktisat bölümünde
 
 Yine gelen cevabın alt satırlarına bakıldığında örneğin 2015 yılında kayıt olmuş İktisat bölümünde okuyan öğrenci sayısı altıdır. Bu şekilde birleştirme işlemi sadece belirli bir kriteri sağlayan kayıtlar üzerinden de yapılabilmektedir. Şimdi biraz daha farklı bir örnek yapalım ve her bir bölümdeki öğrencilerin ortalama yaşına bakalım.
 
-![alt text](images/13.png)
+![alt text](images/14.png)
 
 Bu kısımda bahsettiğimiz örnekler Elasticsearch ile yapılabileceklerin sadece ufak bir kısmıydı. Fakat, elasticsearch ile karmaşık aramaların ne kadar hızlı bir şekilde yapılabildiğinin ve nasıl yapıldığının bir gösterimi olarak düşünülebilir. Daha detaylı aramaların nasıl yapılabileceği ve aramalarda kullanılan DSL dilinin yazım biçimleri için elastic.co sayfasına bakabilirsiniz.
 
