@@ -21,6 +21,7 @@ Bu çalışma kapsamında anlatılan bütün kurulumlar CentOS 7 üzerinde yapı
 rpm –import https://packages.elastic.co/GPG-KEY-elasticsearch
 ```
 * Elasticsearch’ün yüklenebilmesi için gerekli olan repo dosyasını aşağıdaki gibi oluşturunuz ve elasticsearch.repo olarak /etc/yum.repos.d klasörü altına kaydediniz:
+
 ![alt text](images/1.png)
 
 * Oluşturduğunuz repo dosyasını kullanarak elasticsearch’ü yükleyiniz:
@@ -34,6 +35,7 @@ systemctl enable elasticsearch.service
 systemctl start elasticsearch.service
 ```
 * Elasticsearch’ün düzgün çalışıp çalışmadığını kontrol etmek için aşağıdaki komutu çalıştırabilirsiniz. Çıkan sonuçta elasticsearch versiyonunu, dizi adını (varsayılan olarak elasticsearch) ve diğer varsayılan değerleri görebilirsiniz.
+
 ![alt text](images/2.png)
 
 ### 2.1.3. Konfigürasyon
@@ -92,38 +94,68 @@ komutu çalıştırılabilir.
 Bu kısımda daha önceki Kurulum ve REST API kısımlarında sağlanan bilgiler ışığında basit bir örnek canlandırılacaktır. 
 
 Öncelikle Elasticsearch için aşağıdaki gibi basit bir durum kontrolü yapalım.
+
 ![alt text](images/3.png)
-Gelen cevaptan da anlaşılacağı üzere elasticsearch isimli dizi yeşil yani çalışır durumda. Ayrıca bu
- dizimizin içerisindeki düğümlerin listesini de getirelim.
- ![alt text](images/4.png)
- Son olarak da Elasticsearch içerisinde bulunan endekslerin bir listesini getirelim.
- ![alt text](images/5.png)
- Henüz kurulumdan sonar bir şey eklemediğimiz için gelen cevaptan da anlaşılacağı üzere Elasticsearch üzerinde herhangi bir endeks bulunmamaktadır.
+
+Gelen cevaptan da anlaşılacağı üzere elasticsearch isimli dizi yeşil yani çalışır durumda. Ayrıca bu dizimizin içerisindeki düğümlerin listesini de getirelim.
+
+![alt text](images/4.png)
+
+Son olarak da Elasticsearch içerisinde bulunan endekslerin bir listesini getirelim.
+ 
+![alt text](images/5.png)
+ 
+Henüz kurulumdan sonar bir şey eklemediğimiz için gelen cevaptan da anlaşılacağı üzere Elasticsearch üzerinde herhangi bir endeks bulunmamaktadır.
 
 Daha önce bahsedildiği gibi Elasticsearch birden fazla endekse sahip olabilir ve bu endekslerin altında birden fazla tip olabilir. Her bir tip için de birden fazla doküman denilen kayıtlar bulunabilir. Buradaki öğrenciler ile ilgili bilgileri barındıran bir okul endeksi kuracağız. Bu endeksin altında da ogrenci tipinde dokümanlar oluşturacağız. Bunun için oluşturmuş olduğumuz json formatındaki dosyayı elasticsearch e yeni bir endeks olarak aşağıdaki gibi yüklüyoruz.
+
 ![alt text](images/6.png)
+
 Düzgün bir şekilde yüklenip yüklenmediğini kontrol etmek için dokümanlardan bir tanesini çekelim.
+
 ![alt text](images/7.png)
+
 Çıkan sonuçtan da görüleceği üzere her bir ogrenci dokümanı ad, soyad, yaş, sınıf, kayıt tarihi ve bölüm bilgilerinden oluşmaktadır. Verilerimizin elasticsearch de düzgün bir şekilde tutulduğundan emin olduktan sonra bir sonraki işlemimiz bu veriler üzerinde arama yapmak. Öncelikle soyadı Hester olan öğrencilerin kayıtlarını getirelim.
+
 ![alt text](images/8.png)
+
 Yukarıda görüleceği üzere q parametresi alan adı ve değerini alarak bunlar için sorgulama yapmaktadır. Fakat ileri seviye aramaların q parametresi ile yapılabilmesi gerçekten çok zor, bu yüzden elasticsearch DSL (Domain-Specific Language) dilinde aramalar yapabilmeyi mümkün kılmıştır. Örneğin yukarıda yaptığımız aramanın aynısını şu şekilde yapmamız da mümkündür.
+
 ![alt text](images/9.png)
+
 Görüleceği üzere iki arama da aynı sonuçları getirdi. Bu örnek için DSL kullanımı gereksiz gibi dursa da, ismi Susanna olan ve yaşı 20 den büyük olan kişileri aramak istediğimiz de DSL in ne kadar önemli olduğunu anlıyoruz. Bahsettiğimiz aramayı şimdi DSL ile yapalım.
+
 ![alt text](images/10.png)
+
 Yukarıdaki aramada yazılan range filtresi belirli bir aralık için arama yapılırken kullanılmaktadır. Daha önce de kullandığımız match ise direk bir eşleşme aramaktadır.
 
 Şimdi ise mühendislik okuyan öğrencilerin kaydını getirmeye çalışalım. Bunun için birden fazla bölüm olduğu için, direk bölüm alanında mühendis ifadesini içeren kayıtları getirelim.
+
 ![alt text](images/11.png)
+
 Görüldüğü gibi bu şekilde mühendislik bölümlerinde okuyan öğrencilerin kayıtlarını getirmiş olduk. Bu aramada öncekilerden farklı olarak bolum alanında muhendis ifadesi içeren tüm kayıtlar getirildi. Buradaki _score alanı aratılan ifadenin alan içerisinde ne kadarının eşleştiğinin normalize edilmiş halidir. Şimdi sadece Bilgisayar mühendisliği bölümünde okuyan öğrencilerin kayıtlarını getirmeye çalışalım.
+
 ![alt text](images/12.png)
+
 Görüleceği üzere Bilgisayar Mühendisliği ifadesi iki kelime içerdiği için match filtresi değil onun yerine match_phrase filtresi kullanıldı.
 
 Şimdiye kadar elasticsearch üzerinde bulunan bir endekste kayıtlı dokümanlar üzerinde arama ve filtreleme işlemi nasıl yapılır onlara değindik. Şimdi ise elasticsearch’ün tercih edilme sebeplerinden birisi olan analiz yeteneğini biraz inceleyelim. Elasticsearch, SQL’deki GROUP BY özelliği gibi birleştirme (aggregation) özelliğine sahiptir. Bu özelliği kullanmak için şimdi okulda kayıtlı öğrencilerin kaçının hangi bölümde okuduğunu öğrenmeye çalışalım.
+
 ![alt text](images/13.png)
+
 Gelen cevabın alt satırlarına bakıldığında örneğin iktisat bölümünde toplam 28 öğrenci bulunmaktadır. Bu aramamızı geliştirerek Iktisat bölümünde okuyan öğrencilerin kayıt yılına göre sayılarına bakalım.
+
 ![alt text](images/14.png)
+
 Yine gelen cevabın alt satırlarına bakıldığında örneğin 2015 yılında kayıt olmuş İktisat bölümünde okuyan öğrenci sayısı altıdır. Bu şekilde birleştirme işlemi sadece belirli bir kriteri sağlayan kayıtlar üzerinden de yapılabilmektedir. Şimdi biraz daha farklı bir örnek yapalım ve her bir bölümdeki öğrencilerin ortalama yaşına bakalım.
+
 ![alt text](images/15.png)
+
 Bu kısımda bahsettiğimiz örnekler Elasticsearch ile yapılabileceklerin sadece ufak bir kısmıydı. Fakat, elasticsearch ile karmaşık aramaların ne kadar hızlı bir şekilde yapılabildiğinin ve nasıl yapıldığının bir gösterimi olarak düşünülebilir. Daha detaylı aramaların nasıl yapılabileceği ve aramalarda kullanılan DSL dilinin yazım biçimleri için elastic.co sayfasına bakabilirsiniz.
 
+## 2.2. Logstash
+Logstash gerçek zamanlı veri toplama motorudur. Pek çok farklı kaynaktan topladığı verileri birleştirip istenilen hedef konuma kaydedebilmektedir. Herhangi bir yapıya sahip veri Logstash filtre ve output pluginleriyle istenildiği gibi işlenebilmektedir. Logstash sayesinde istenilen türe sahip loglar toplanabilmekte ve ayrıca çeşitli pluginler aracılığıyla bilgisayar üzerinde gerçekleşen pek çok olayın kayıtları tutulabilmektedir. 
+
+Belirli bir verinin logstash ile toplanabilmesi için, Logstash bir veya daha fazla input, filter veya output plugini kullanmaktadır. Bunlardan filter plugini opsiyonel olsa da, input ve output pluginlerini kullanmak zorunludur. İnput plugini bir kaynaktan verilerin çekilmesini, filter plugini istenilen şekilde verinin değiştirilmesini ve output plugini ise bu verinin bir hedefe yazılmasını sağlar. Bu pluginler konfigürasyon dosyalarına yazılarak kullanılmaktadır. Bu dosyaların nasıl yazılacağı konfigürasyon kısmında ve kullanım senaryoları kısmında detaylı olarak işlenecektir. 
+### 2.2.1. Kurulum
 
